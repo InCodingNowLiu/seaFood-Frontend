@@ -1,7 +1,7 @@
 var util = require('../../../utils/util.js');
 var api = require('../../../config/api.js');
 var app = getApp();
-
+const apiService = require('../../../services/apiService.js');
 Page({
   data: {
     addressList: [],
@@ -15,12 +15,14 @@ Page({
   },
   onShow: function () {
     // 页面显示
-
+    this.getAddressList();
   },
   getAddressList (){
+
     let that = this;
-    util.request(api.AddressList).then(function (res) {
-      if (res.errno === 0) {
+    apiService.getAddressList((err, res) => {
+      console.log('address list', res.data);
+      if (res.data) {
         that.setData({
           addressList: res.data
         });
@@ -29,8 +31,17 @@ Page({
   },
   addressAddOrUpdate (event) {
     console.log(event)
-    wx.navigateTo({
-      url: '/pages/ucenter/addressAdd/addressAdd?id=' + event.currentTarget.dataset.addressId
+    // wx.navigateTo({
+    //   url: '/pages/ucenter/addressAdd/addressAdd?id=' + event.currentTarget.dataset.addressId
+    // })
+
+    wx.chooseAddress({
+      success: function(res) {
+        console.log(res);
+        wx.navigateTo({
+          url: '/pages/ucenter/addressAdd/addressAdd?des=' + JSON.stringify(res)
+    })
+      }
     })
   },
   deleteAddress(event){
@@ -42,11 +53,12 @@ Page({
       success: function (res) {
         if (res.confirm) {
           let addressId = event.target.dataset.addressId;
-          util.request(api.AddressDelete, { id: addressId }, 'POST').then(function (res) {
-            if (res.errno === 0) {
+          apiService.deleteAddress({addressId}, (err, res) => {
+            if (res.data) {
               that.getAddressList();
             }
-          });
+          })
+
           console.log('用户点击确定')
         }
       }

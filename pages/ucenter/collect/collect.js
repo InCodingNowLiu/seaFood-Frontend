@@ -1,5 +1,6 @@
 var util = require('../../../utils/util.js');
 var api = require('../../../config/api.js');
+const apiService = require('../../../services/apiService.js');
 
 var app = getApp();
 
@@ -10,14 +11,13 @@ Page({
   },
   getCollectList() {
     let that = this;
-    util.request(api.CollectList, { typeId: that.data.typeId}).then(function (res) {
-      if (res.errno === 0) {
-        console.log(res.data);
+    apiService.getListFromCollection((err, res) => {
+      if (res.data) {
         that.setData({
-          collectList: res.data.data
-        });
+          collectList: res.data,
+        })
       }
-    });
+    })
   },
   onLoad: function (options) {
     this.getCollectList();

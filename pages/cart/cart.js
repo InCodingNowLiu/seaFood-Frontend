@@ -1,17 +1,20 @@
 var util = require('../../utils/util.js');
 var api = require('../../config/api.js');
+const apiService = require('../../services/apiService.js');
+const wxService = require('../../services/wxService.js');
 
 var app = getApp();
 
 Page({
   data: {
-    cartGoods: [],
+    cartGoods:[],
     cartTotal: {
       "goodsCount": 0,
       "goodsAmount": 0.00,
       "checkedGoodsCount": 0,
       "checkedGoodsAmount": 0.00
     },
+    totalPrice: 0,
     isEditCart: false,
     checkedAllStatus: true,
     editCartList: []
@@ -19,15 +22,29 @@ Page({
   onLoad: function (options) {
     // 页面初始化 options为页面跳转所带来的参数
 
-
   },
+  
+  loadShoppingCarts: function() {
+    let that = this;
+
+    apiService.getProductFromShoppingCart((err, res) => {
+      that.setData({
+        cartGoods: res.data.cart,
+        totalPrice: res.data.totalPrice,
+      })
+      console.log('getProductFromShoppingCart', res.data);
+
+    })
+  },
+
   onReady: function () {
     // 页面渲染完成
 
   },
   onShow: function () {
     // 页面显示
-    this.getCartList();
+    // this.getCartList();
+    this.loadShoppingCarts();
   },
   onHide: function () {
     // 页面隐藏
@@ -232,6 +249,12 @@ Page({
     wx.navigateTo({
       url: '../shopping/checkout/checkout'
     })
+  },
+
+  buyNow: function () {
+    wxService.showModalStyle('立即购买', '联系', '目前由于订单量巨大, 需要购买请联系商家', () => {
+      wxService.makePhoneCallWithNumber('176702131394');
+    }, () => { })
   },
   deleteCart: function () {
     //获取已选择的商品

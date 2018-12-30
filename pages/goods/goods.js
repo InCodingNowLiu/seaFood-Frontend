@@ -2,28 +2,37 @@ var app = getApp();
 var WxParse = require('../../lib/wxParse/wxParse.js');
 var util = require('../../utils/util.js');
 var api = require('../../config/api.js');
+var apiService = require('../../services/apiService.js');
+var wxService = require('../../services/wxService.js');
 
 Page({
   data: {
     id: 0,
-    goods: {},
+    goods: {
+    },
+    introdctionImgs: [],
     gallery: [],
     attribute: [],
-    issueList: [],
+    comments: [],
     comment: [],
-    brand: {},
+    brand: {
+    },
     specificationList: [],
     productList: [],
     relatedGoods: [],
     cartGoodsCount: 0,
     userHasCollect: 0,
-    number: 1,
+    number: 0,
     checkedSpecText: '请选择规格数量',
     openAttr: false,
     noCollectImage: "/static/images/icon_collect.png",
     hasCollectImage: "/static/images/icon_collect_checked.png",
     collectBackImage: "/static/images/icon_collect.png"
   },
+
+
+
+
   getGoodsInfo: function () {
     let that = this;
     util.request(api.GoodsDetail, { id: that.data.id }).then(function (res) {
@@ -130,11 +139,8 @@ Page({
   },
   //判断规格是否选择完整
   isCheckedAllSpec: function () {
-    return !this.getCheckedSpecValue().some(function (v) {
-      if (v.valueId == 0) {
-        return true;
-      }
-    });
+    console.log(this.data.number);
+    return this.data.number === 0 ? true : false;
   },
   getCheckedSpecKey: function () {
     let checkedValue = this.getCheckedSpecValue().map(function (v) {
@@ -176,23 +182,45 @@ Page({
       }
     });
   },
-  onLoad: function (options) {
-    // 页面初始化 options为页面跳转所带来的参数
-    this.setData({
-      id: parseInt(options.id)
-      // id: 1181000
-    });
-    var that = this;
-    this.getGoodsInfo();
-    util.request(api.CartGoodsCount).then(function (res) {
-      if (res.errno === 0) {
-        that.setData({
-          cartGoodsCount: res.data.cartTotal.goodsCount
-        });
 
-      }
+
+  onLoad: function (options) {
+    this.setData({
+      id: options.id,
     });
+    console.log(this.data.id);
+    var that = this;
+    apiService.getGoodsById({id: that.data.id}, function(error, res) {
+      console.log('-------', res.data);
+      that.setData({
+        goods: res.data.goods,
+        introdctionImgs: res.data.productDetails.introdctionImgs,
+        attribute: res.data.productDetails.attribute,
+        issueList: res.data.productDetails.issueList,
+        comments: res.data.comments,
+        comment: res.data.comments.length > 0 ? res.data.comments[0] : [],
+        specificationList: res.data.productDetails.specificationList,
+        relatedGoods: res.data.relationGoods,
+        cartGoodsCount: res.data.cartGoodsCount,
+        'collectBackImage': res.data.likeStatus === 'dislike' ? that.data.noCollectImage : that.data.hasCollectImage,
+      })
+      console.log(that.data.comment, res.data.comments, res.data.comments[0]);
+    });
+
+    // var that = this;
+    // this.getGoodsInfo();
+    // util.request(api.CartGoodsCount).then(function (res) {
+    //   if (res.errno === 0) {
+    //     that.setData({
+    //       cartGoodsCount: res.data.cartTotal.goodsCount
+    //     });
+
+    //   }
+    // });
   },
+
+
+
   onReady: function () {
     // 页面渲染完成
 
@@ -223,6 +251,7 @@ Page({
   },
   addCannelCollect: function () {
     let that = this;
+    apiService
     //添加或是取消收藏
     util.request(api.CollectAddOrDelete, { typeId: 0, valueId: this.data.id }, "POST")
       .then(function (res) {
@@ -262,7 +291,7 @@ Page({
     } else {
 
       //提示选择完整规格
-      if (!this.isCheckedAllSpec()) {
+      if (that.data.number < 1) {
         wx.showToast({
           image: '/static/images/icon_error.png',
           title: '请选择规格',
@@ -270,51 +299,19 @@ Page({
         });
         return false;
       }
-
-      //根据选中的规格，判断是否有对应的sku信息
-      let checkedProduct = this.getCheckedProductItem(this.getCheckedSpecKey());
-      if (!checkedProduct || checkedProduct.length <= 0) {
-        //找不到对应的product信息，提示没有库存
-        wx.showToast({
-          image: '/static/images/icon_error.png',
-          title: '库存不足',
-          mask: true
-        });
-        return false;
+      const data = {
+        number: that.data.number,
+        goodId: that.data.goods._id,
       }
-
-      //验证库存
-      if (checkedProduct.goods_number < this.data.number) {
-        //找不到对应的product信息，提示没有库存
-        wx.showToast({
-          image: '/static/images/icon_error.png',
-          title: '库存不足',
-          mask: true
-        });
-        return false;
-      }
-
-      //添加到购物车
-      util.request(api.CartAdd, { goodsId: this.data.goods.id, number: this.data.number, productId: checkedProduct[0].id }, "POST")
-        .then(function (res) {
-          let _res = res;
-          if (_res.errno == 0) {
-            wx.showToast({
-              title: '添加成功'
-            });
-            that.setData({
-              openAttr: !that.data.openAttr,
-              cartGoodsCount: _res.data.cartTotal.goodsCount
-            });
-          } else {
-            wx.showToast({
-              image: '/static/images/icon_error.png',
-              title: _res.errmsg,
-              mask: true
-            });
-          }
-
-        });
+      apiService.addGoodToShoppingCarts(data, (err, res) => {
+        console.log('add to carts', res.data);
+        wxService.showToast('添加成功');
+        that.setData({
+          openAttr: !that.data.openAttr,
+          cartGoodsCount: res.data,
+          number: 0
+        })
+      })
     }
 
   },
@@ -327,5 +324,30 @@ Page({
     this.setData({
       number: this.data.number + 1
     });
+  },
+  buyNow: function () {
+    wxService.showModalStyle('立即购买', '联系', '目前由于订单量巨大, 需要购买请联系商家', ()=>{
+      wxService.makePhoneCallWithNumber('176702131394');
+  }, () => {})
+  },
+
+  addToCollection: function () {
+    let that = this;
+    const data = {
+      goodId: that.data.goods._id,
+    }
+    apiService.addToCollection(data, (err, res) => {
+      console.log(res.data);
+      if (res.data === 'like') {
+        that.setData({
+          'collectBackImage': that.data.hasCollectImage
+        });
+      } else if (res.data === 'dislike') {
+        that.setData({
+          'collectBackImage': that.data.noCollectImage
+        })
+      }
+    })
   }
+
 })

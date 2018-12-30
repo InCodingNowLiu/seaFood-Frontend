@@ -1,6 +1,10 @@
 var util = require('../../../utils/util.js');
 var api = require('../../../config/api.js');
+const apiService = require('../../../services/apiService.js');
+const wxService = require('../../../services/wxService.js');
+
 var app = getApp();
+
 Page({
   data: {
     address: {
@@ -12,7 +16,8 @@ Page({
       full_region: '',
       name: '',
       mobile: '',
-      is_default: 0
+      is_default: 0,
+      desc: {},
     },
     addressId: 0,
     openSelectRegion: false,
@@ -118,17 +123,27 @@ Page({
 
   },
   onLoad: function (options) {
-    // 页面初始化 options为页面跳转所带来的参数
-    console.log(options)
-    if (options.id) {
+    console.log(options);
+    const that = this;
+    if (options.des) {
+      let address = JSON.parse(options.des)
+      console.log(address.userName, address.telNumber);
+      const add = {
+        name: address.userName,
+        mobile: address.telNumber,
+        full_region: address.countyName + address.cityName + address.provinceName,
+        address: address.detailInfo,
+        is_default: that.data.is_default,
+      }
       this.setData({
-        addressId: options.id
+        des: address,
+        name: address.userName,
+        mobile: address.telNumber,
+        full_region: address.countyName + address.cityName + address.provinceName,
+        address: add
       });
-      this.getAddressDetail();
+      console.log('11', this.data.des);
     }
-
-    this.getRegionList(1);
-
   },
   onReady: function () {
 
@@ -291,22 +306,39 @@ Page({
 
 
     let that = this;
-    util.request(api.AddressSave, { 
-      id: address.id,
+    const data = {
       name: address.name,
       mobile: address.mobile,
-      province_id: address.province_id,
-      city_id: address.city_id,
-      district_id: address.district_id,
-      address: address.address,
-      is_default: address.is_default,
-    }, 'POST').then(function (res) {
-      if (res.errno === 0) {
-        wx.navigateTo({
-          url: '/pages/ucenter/address/address',
-        })
-      }
+      countryCityPro: address.full_region,
+      addressDetail: address.address,
+      isDefault: address.is_default === 0 ? false : true,
+    }
+    apiService.saveAddress(data, (err, res) => {
+      console.log('saveAddress', res.data);
+      wxService.showToast('保存成功', 'success');
+      setTimeout(() => {
+        wxService.hideToast();
+        wx.navigateBack({
+        });
+      }, 1000);
+
     });
+    // util.request(api.AddressSave, { 
+    //   id: address.id,
+    //   name: address.name,
+    //   mobile: address.mobile,
+    //   province_id: address.province_id,
+    //   city_id: address.city_id,
+    //   district_id: address.district_id,
+    //   address: address.address,
+    //   is_default: address.is_default,
+    // }, 'POST').then(function (res) {
+    //   if (res.errno === 0) {
+    //     wx.navigateTo({
+    //       url: '/pages/ucenter/address/address',
+    //     })
+    //   }
+    // });
 
   },
   onShow: function () {

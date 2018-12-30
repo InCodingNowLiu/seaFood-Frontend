@@ -35,6 +35,7 @@
 
 .cate-nav .item.active .name{
     color: #ab2b2b;
+    text-align:center;
     border-bottom: 2px solid #ab2b2b;
 }
 

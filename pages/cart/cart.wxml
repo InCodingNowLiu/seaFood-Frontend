@@ -1,7 +1,7 @@
 <view class="container">
   <view class="service-policy">
-    <view class="item">30天无忧退货</view>
-    <view class="item">48小时快速退款</view>
+    <view class="item">当天打捞</view>
+    <view class="item">24小时极速达</view>
     <view class="item">满88元免邮费</view>
   </view>
   <view class="no-cart" wx:if="{{cartGoods.length <= 0}}">
@@ -15,12 +15,12 @@
       <view class="group-item">
         <view class="goods">
           <view class="item {{isEditCart ? 'edit' : ''}}" wx:for="{{cartGoods}}" wx:key="{{item.id}}">
-            <view class="checkbox {{item.checked ? 'checked' : ''}}" bindtap="checkedItem" data-item-index="{{index}}"></view>
+            <view class="checkbox checked" bindtap="checkedItem" data-item-index="{{index}}"></view>
             <view class="cart-goods">
               <image class="img" src="{{item.list_pic_url}}"></image>
               <view class="info">
                 <view class="t">
-                  <text class="name">{{item.goods_name}}</text>
+                  <text class="name">{{item.name}}</text>
                   <text class="num">x{{item.number}}</text>
                 </view>
                 <view class="attr">{{ isEditCart ? '已选择:' : ''}}{{item.goods_specifition_name_value}}</view>
@@ -69,11 +69,12 @@
             </view>-->
     </view>
     <view class="cart-bottom">
-      <view class="checkbox {{checkedAllStatus ? 'checked' : ''}}" bindtap="checkedAll">全选({{cartTotal.checkedGoodsCount}})</view>
-      <view class="total">{{!isEditCart ? '￥'+cartTotal.checkedGoodsAmount : ''}}</view>
-      <view class="delete" bindtap="editCart">{{!isEditCart ? '编辑' : '完成'}}</view>
-      <view class="checkout" bindtap="deleteCart" wx:if="{{isEditCart}}">删除所选</view>
-      <view class="checkout" bindtap="checkoutOrder" wx:if="{{!isEditCart}}">下单</view>
+      <view class="checkbox checked}}">全选({{cartGoods.length}})</view>
+      <view class="total">{{totalPrice}}</view>
+      <!-- <view class="delete" bindtap="editCart">{{!isEditCart ? '编辑' : '完成'}}</view> -->
+      <view class="delete" bindtap="editCart"></view>
+      <view class="checkout" bindtap="deleteCart" wx:if="{{isEditCart}}"></view>
+      <view class="checkout" bindtap="buyNow" wx:if="{{!isEditCart}}">下单</view>
     </view>
   </view>
 </view>

@@ -1,5 +1,6 @@
 var util = require('../../utils/util.js');
 var api = require('../../config/api.js');
+var apiService = require('../../services/apiService.js');
 
 Page({
   data: {
@@ -7,7 +8,8 @@ Page({
     navList: [],
     goodsList: [],
     id: 0,
-    currentCategory: {},
+    currentCategory: {
+    },
     scrollLeft: 0,
     scrollTop: 0,
     scrollHeight: 0,
@@ -16,6 +18,7 @@ Page({
   },
   onLoad: function (options) {
     // 页面初始化 options为页面跳转所带来的参数
+    console.log('come in to onload page');
     var that = this;
     if (options.id) {
       that.setData({
@@ -30,11 +33,56 @@ Page({
         });
       }
     });
-
-
-    this.getCategoryInfo();
-
+    this.firstLoadCategory();
+    this.getGoodsByCategory(0);
   },
+
+  getGoodsByCategory: function (subCategory) {
+    const self = this;
+    const data = {
+      subCategory
+    }
+    apiService.getGoodsByCategory(data, function(err, res){
+      self.setData({
+        goodsList: res.data
+      })
+    });
+  },
+
+
+  firstLoadCategory: function () {
+    let self = this;
+    apiService.getCategory(function (err, res) {
+      self.setData({
+        navList: res.data,
+      });
+    });
+    self.getCurrentCategory(0);
+    self.getTotalProduct();
+  },
+
+  getCurrentCategory: function (cate) {
+    let self = this;
+    apiService.itemsCategory({ category: cate }, (err, res) => {
+      console.log('------data------', res);
+      self.setData({
+        currentCategory: res.data,
+      });
+    });
+  },
+
+  getTotalProduct: function () {
+    let self = this;
+    // apiService.totalCategory((err, res) => {
+    //   self.setData({
+    //     goodsCount: res.data,
+    //   })
+    // })
+  },
+
+
+
+
   getCategoryInfo: function () {
     let that = this;
     util.request(api.GoodsCategory, { id: this.data.id })
@@ -92,6 +140,7 @@ Page({
     // 页面关闭
   },
   switchCate: function (event) {
+    console.log(event.currentTarget.dataset);
     if (this.data.id == event.currentTarget.dataset.id) {
       return false;
     }
@@ -110,7 +159,9 @@ Page({
     this.setData({
       id: event.currentTarget.dataset.id
     });
-
-    this.getCategoryInfo();
+    this.setData({
+      currentCategory: this.data.navList[this.data.id],
+    })
+    this.getGoodsByCategory(this.data.id);
   }
 })

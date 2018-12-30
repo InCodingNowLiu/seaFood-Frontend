@@ -5,8 +5,6 @@ var app = getApp();
 Page({
   data: {
     bannerInfo: {
-      'img_url': '',
-      'name': ''
     },
     categoryFilter: false,
     filterCategory: [],

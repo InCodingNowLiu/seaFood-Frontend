@@ -9,26 +9,31 @@ Page({
   },
   onLoad: function (options) {
     // 页面初始化 options为页面跳转所带来的参数
-    console.log(app.globalData)
+    let self = this;
+    let userInfo = wx.getStorageSync('user');
+    if (!userInfo) {
+      wx.redirectTo({
+        url: '../../start/start',
+      })
+    } else {
+      self.setData({
+        userInfo: userInfo
+      })
+    } 
   },
   onReady: function () {
 
   },
   onShow: function () {
 
-    let userInfo = wx.getStorageSync('userInfo');
-    let token = wx.getStorageSync('token');
+    let userInfo = wx.getStorageSync('user');
+    let token = userInfo.token;
 
     // 页面显示
     if (userInfo && token) {
       app.globalData.userInfo = userInfo;
       app.globalData.token = token;
     }
-
-    this.setData({
-      userInfo: app.globalData.userInfo,
-    });
-
   },
   onHide: function () {
     // 页面隐藏
