@@ -252,7 +252,7 @@ Page({
   },
 
   buyNow: function () {
-    wxService.showModalStyle('立即购买', '联系', '目前由于订单量巨大, 需要购买请联系商家', () => {
+    wxService.showModalStyle('预定', '联系', '请联系客服', () => {
       wxService.makePhoneCallWithNumber('176702131394');
     }, () => { })
   },

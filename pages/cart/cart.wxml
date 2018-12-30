@@ -2,7 +2,7 @@
   <view class="service-policy">
     <view class="item">当天打捞</view>
     <view class="item">24小时极速达</view>
-    <view class="item">满88元免邮费</view>
+    <!-- <view class="item">满88元免邮费</view> -->
   </view>
   <view class="no-cart" wx:if="{{cartGoods.length <= 0}}">
     <view class="c">
@@ -21,11 +21,11 @@
               <view class="info">
                 <view class="t">
                   <text class="name">{{item.name}}</text>
-                  <text class="num">x{{item.number}}</text>
+                  <!-- <text class="num">x{{item.number}}</text> -->
                 </view>
                 <view class="attr">{{ isEditCart ? '已选择:' : ''}}{{item.goods_specifition_name_value}}</view>
                 <view class="b">
-                  <text class="price">￥{{item.retail_price}}</text>
+                  <!-- <text class="price">￥{{item.retail_price}}</text> -->
                   <view class="selnum">
                     <view class="cut" bindtap="cutNumber" data-item-index="{{index}}">-</view>
                     <input value="{{item.number}}" class="number" disabled="true" type="number" />
@@ -69,12 +69,12 @@
             </view>-->
     </view>
     <view class="cart-bottom">
-      <view class="checkbox checked}}">全选({{cartGoods.length}})</view>
-      <view class="total">{{totalPrice}}</view>
-      <!-- <view class="delete" bindtap="editCart">{{!isEditCart ? '编辑' : '完成'}}</view> -->
+      <view class="checkbox checked}}">喜欢({{cartGoods.length}})</view>
+      <view class="total"></view>
+      <view class="delete" bindtap="editCart">{{!isEditCart ? '' : ''}}</view>
       <view class="delete" bindtap="editCart"></view>
-      <view class="checkout" bindtap="deleteCart" wx:if="{{isEditCart}}"></view>
-      <view class="checkout" bindtap="buyNow" wx:if="{{!isEditCart}}">下单</view>
+      <!-- <view class="checkout" bindtap="deleteCart" wx:if="{{isEditCart}}">喜欢</view> -->
+      <view class="checkout" bindtap="buyNow" wx:if="{{!isEditCart}}">联系客服</view>
     </view>
   </view>
 </view>

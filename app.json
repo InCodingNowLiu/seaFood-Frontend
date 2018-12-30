@@ -62,9 +62,9 @@
       },
       {
         "pagePath": "pages/cart/cart",
-        "iconPath": "static/images/ic_menu_shoping_nor.png",
-        "selectedIconPath": "static/images/ic_menu_shoping_pressed.png",
-        "text": "购物车"
+        "iconPath": "static/images/icon_collect.png",
+        "selectedIconPath": "static/images/icon_collect_checked.png",
+        "text": "喜欢"
       },
       {
         "pagePath": "pages/ucenter/index/index",
