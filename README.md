@@ -1,1 +1,1 @@
-Provide For Seafodd service
+Provide For SeaFood service
